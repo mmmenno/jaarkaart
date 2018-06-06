@@ -138,7 +138,7 @@ foreach ($names as $v) {
 	<div class="col-md-3">
 		<h1>bekend als</h1>
 		<ul>
-		<?
+		<?php
 		foreach ($names as $v) {
 			echo "<li>" . $v['name'];
 			if(isset($v['namebeginmin']) && isset($v['nameendmax'])){
@@ -163,6 +163,6 @@ foreach ($names as $v) {
 </div>
 
 <a href="<?= $querylink ?>">SPARQL it yourself</a>
-<?
+<?php
 
-print_r(count($imgs));
+//print_r(count($imgs));
