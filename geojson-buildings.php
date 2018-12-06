@@ -26,8 +26,15 @@ SELECT DISTINCT ?building ?wkt (SAMPLE(?img) AS ?img) WHERE {
     ?building sem:hasEarliestBeginTimeStamp ?beginmin .
     ?building sem:hasLatestBeginTimeStamp ?beginmax .
     ?building sem:hasEarliestEndTimeStamp ?endmin .
-    ?building sem:hasLatestEndTimeStamp ?endmax .
-    ?building geo:hasGeometry/geo:asWKT ?wkt .
+    ?building sem:hasLatestEndTimeStamp ?endmax .';
+
+if(isset($_GET['type']) && strpos($_GET['type'],"vocab.getty")){
+	$sparqlquery .= '
+	?building dc:type <' . $_GET['type'] . '> .';
+}
+
+$sparqlquery .= '
+	?building geo:hasGeometry/geo:asWKT ?wkt .
     FILTER (year(xsd:dateTime(?beginmin)) < ' . $jaar . ')
     FILTER (year(xsd:dateTime(?endmax)) > ' . $jaar . ')
   }UNION{
@@ -37,8 +44,15 @@ SELECT DISTINCT ?building ?wkt (SAMPLE(?img) AS ?img) WHERE {
       ?cho foaf:depiction ?img .
     }
     ?building sem:hasEarliestBeginTimeStamp ?beginmin .
-    ?building sem:hasLatestBeginTimeStamp ?beginmax .
-    ?building geo:hasGeometry/geo:asWKT ?wkt .
+    ?building sem:hasLatestBeginTimeStamp ?beginmax . ';
+
+if(isset($_GET['type']) && strpos($_GET['type'],"vocab.getty")){
+	$sparqlquery .= '
+	?building dc:type <' . $_GET['type'] . '> .';
+}
+
+$sparqlquery .= '
+	?building geo:hasGeometry/geo:asWKT ?wkt .
     FILTER NOT EXISTS {?building sem:hasEarliestEndTimeStamp ?endmin}
     FILTER NOT EXISTS {?building sem:hasLatestEndTimeStamp ?endmax}
     FILTER (year(xsd:dateTime(?beginmin)) < ' . $jaar . ')
@@ -47,6 +61,8 @@ SELECT DISTINCT ?building ?wkt (SAMPLE(?img) AS ?img) WHERE {
 GROUP BY ?building ?wkt
 ';
 
+//echo $sparqlquery;
+//die;
 
 $url = "https://api.data.adamlink.nl/datasets/AdamNet/all/services/endpoint/sparql?default-graph-uri=&query=" . urlencode($sparqlquery) . "&format=application%2Fsparql-results%2Bjson&timeout=120000&debug=on";
 

@@ -123,6 +123,10 @@
 
 	function refreshMap(){
 
+		var url = new URL(window.location.href);
+		var typeparam = url.searchParams.get("type");
+		console.log(typeparam);
+
 		var jaar = $('#year').val();
 		
 		buildings = L.geoJson(null, {
@@ -151,7 +155,7 @@
 
 		
 
-	    geojsonfile = 'geojson-buildings.php?jaar='+jaar;
+	    geojsonfile = 'geojson-buildings.php?jaar='+jaar+'&type='+typeparam;
 		
 		$.getJSON(geojsonfile, function(data) {
 	        buildings.addData(data).bringToFront();

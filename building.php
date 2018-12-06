@@ -2,7 +2,7 @@
 
 $uri = $_GET['uri'];
 $marginAhead = $_GET['year']+10;
-$marginBefore = $_GET['year']-10;
+$marginBefore = $_GET['year']-2;
 
 $sparqlquery = '
 PREFIX rdf: <http://www.w3.org/1999/02/22-rdf-syntax-ns#>
@@ -33,7 +33,6 @@ SELECT 	?prefl ?beginmin ?beginmax ?endmin ?endmax
       ?cho dct:spatial <' . $uri . '> .
       ?cho foaf:depiction ?img .
       ?cho sem:hasBeginTimeStamp ?imgdate .
-      FILTER (year(xsd:dateTime(?imgdate)) < ' . $marginAhead . ') .
       FILTER (year(xsd:dateTime(?imgdate)) > ' . $marginBefore . ')
     }
     <' . $uri . '> schema:name ?name .
@@ -44,8 +43,13 @@ SELECT 	?prefl ?beginmin ?beginmax ?endmin ?endmax
 		?name sem:hasEarliestEndTimeStamp ?nameendmin .
 		?name sem:hasLatestEndTimeStamp ?nameendmax . 
 	}
-}';
+}
+ORDER BY ?imgdate
+LIMIT 10
+';
 
+//#FILTER (year(xsd:dateTime(?imgdate)) < ' . $marginAhead . ') .
+      
 
 $url = "https://api.data.adamlink.nl/datasets/AdamNet/all/services/endpoint/sparql?default-graph-uri=&query=" . urlencode($sparqlquery) . "&format=application%2Fsparql-results%2Bjson&timeout=120000&debug=on";
 
