@@ -16,14 +16,16 @@ PREFIX sem: <http://semanticweb.cs.vu.nl/2009/11/sem/>
 PREFIX dct: <http://purl.org/dc/terms/>
 PREFIX foaf: <http://xmlns.com/foaf/0.1/>
 PREFIX geo: <http://www.opengis.net/ont/geosparql#>
-SELECT DISTINCT ?building ?wkt (SAMPLE(?img) AS ?img) WHERE {
+SELECT DISTINCT ?building ?wkt (SAMPLE(?img) AS ?img) ?year (SAMPLE(?label) AS ?label) WHERE {
   {
     ?building a hg:Building .
+    ?building rdfs:label ?label .
     OPTIONAL{
       ?cho dct:spatial ?building .
       ?cho foaf:depiction ?img .
     }
     ?building sem:hasEarliestBeginTimeStamp ?beginmin .
+    BIND(year(xsd:dateTime(?beginmin)) as ?year) .
     ?building sem:hasLatestBeginTimeStamp ?beginmax .
     ?building sem:hasEarliestEndTimeStamp ?endmin .
     ?building sem:hasLatestEndTimeStamp ?endmax .';
@@ -34,16 +36,18 @@ if(isset($_GET['type']) && strpos($_GET['type'],"vocab.getty")){
 }
 
 $sparqlquery .= '
-	?building geo:hasGeometry/geo:asWKT ?wkt .
+		?building geo:hasGeometry/geo:asWKT ?wkt .
     FILTER (year(xsd:dateTime(?beginmin)) < ' . $jaar . ')
     FILTER (year(xsd:dateTime(?endmax)) > ' . $jaar . ')
   }UNION{
     ?building a hg:Building .
+    ?building rdfs:label ?label .
     OPTIONAL{
       ?cho dct:spatial ?building .
       ?cho foaf:depiction ?img .
     }
     ?building sem:hasEarliestBeginTimeStamp ?beginmin .
+    BIND(year(xsd:dateTime(?beginmin)) as ?year) .
     ?building sem:hasLatestBeginTimeStamp ?beginmax . ';
 
 if(isset($_GET['type']) && strpos($_GET['type'],"vocab.getty")){
@@ -58,7 +62,7 @@ $sparqlquery .= '
     FILTER (year(xsd:dateTime(?beginmin)) < ' . $jaar . ')
   }
 } 
-GROUP BY ?building ?wkt
+GROUP BY ?building ?wkt ?year
 ';
 
 //echo $sparqlquery;
@@ -74,6 +78,7 @@ $querylink = "https://druid.datalegend.net/AdamNet/all/sparql/endpoint#query=" .
 
 
 // Druid does not like url parameters, send accept header instead
+/*
 $opts = [
     "http" => [
         "method" => "GET",
@@ -85,6 +90,22 @@ $context = stream_context_create($opts);
 
 // Open the file using the HTTP headers set above
 $json = file_get_contents($url, false, $context);
+*/
+
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL,$url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'GET');
+curl_setopt($ch,CURLOPT_USERAGENT,'RotterdamsPubliek');
+$headers = [
+  'Accept: application/sparql-results+json'
+];
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+$json = curl_exec ($ch);
+curl_close ($ch);
 
 $data = json_decode($json,true);
 

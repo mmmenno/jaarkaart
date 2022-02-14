@@ -83,9 +83,17 @@ foreach ($data['results']['bindings'] as $row) {
 	$titel = $row['prefl']['value'];
 	$beginmin = $row['beginmin']['value'];
 	$beginmax = $row['beginmax']['value'];
-	$endmin = $row['endmin']['value'];
-	$endmax = $row['endmax']['value'];
-
+	if(isset($row['endmin']['value'])){
+		$endmin = $row['endmin']['value'];
+	}else{
+		$endmin = "";
+	}
+	if(isset($row['endmax']['value'])){
+		$endmax = $row['endmax']['value'];
+	}else{
+		$endmax = "";
+	}
+	
 	if(isset($row['namelabel']) && !in_array($row['namelabel']['value'], $checknames)){
 		$checknames[] = $row['namelabel']['value'];
 		$thisname = array("name"=>$row['namelabel']['value']);
@@ -166,14 +174,18 @@ foreach ($names as $v) {
 		?>
 		</ul>
 	</div>
+	<?php if(count($imgs)>0){ ?>
 	<div class="col-md-3">
 		<a target="_blank" href="<?= $imgs[0]['cho'] ?>"><img src="<?= $imgs[0]['img'] ?>" />
 		<?= $imgs[0]['date'] ?>	
 	</div>
+	<?php } ?>
+	<?php if(count($imgs)>1){ ?>	
 	<div class="col-md-3">
 		<a target="_blank" href="<?= $imgs[1]['cho'] ?>"><img src="<?= $imgs[1]['img'] ?>" />
 		<?= $imgs[1]['date'] ?>
 	</div>
+	<?php } ?>
 </div>
 
 <a href="<?= $querylink ?>">SPARQL it yourself</a>
